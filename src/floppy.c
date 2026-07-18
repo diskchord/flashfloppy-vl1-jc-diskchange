@@ -94,6 +94,18 @@ static void _drive_change_output(
 {
     IRQ_global_enable();
 
+    /*
+     * Yamaha VL1 / VL1-m:
+     * Output active-low disk-change on the JC signal pin.
+     *
+     * Leave JC unjumpered and connect only its MCU signal pad
+     * to floppy-header pin 4.
+     */
+    if ((fintf_mode != FINTF_AMIGA) && (outp == outp_dskchg)) {
+        board_jc_set_mode(GPO_opendrain(
+            _2MHz, assert ? O_TRUE : O_FALSE));
+    }
+
     if (pin02 == outp) {
         IRQ_global_disable();
         drive_change_pin(drv, pin_02, assert ^ pin02_inverted);
@@ -137,10 +149,13 @@ static void drive_change_output(
 
 static void update_amiga_id(struct drive *drv, bool_t amiga_hd_id)
 {
-    /* JC and pin 34 are overridden only for the Amiga interface. */
     if (fintf_mode != FINTF_AMIGA) {
         drv->amiga_pin34 = FALSE;
-        board_jc_set_mode(GPI_pull_up);
+
+        /*
+         * JC is reserved as the VL1 disk-change output.
+         * Do not restore it to input mode here.
+         */
         return;
     }
 
