@@ -99,7 +99,8 @@ static void _drive_change_output(
      * Output active-low disk-change on the JC signal pin.
      *
      * Leave JC unjumpered and connect only its MCU signal pad
-     * to floppy-header pin 4.
+     * to floppy-header pin 4. This assumes a patch cable between
+     * JC and pin 4.
      */
     if ((fintf_mode != FINTF_AMIGA) && (outp == outp_dskchg)) {
         board_jc_set_mode(GPO_opendrain(
